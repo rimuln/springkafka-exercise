@@ -2,6 +2,7 @@ package navrat.name.vivicta.consumer;
 
 import static navrat.name.vivicta.model.ProcessingStatus.AUTO_FAILED;
 import static navrat.name.vivicta.model.ProcessingStatus.AUTO_PROCESSED;
+import static navrat.name.vivicta.model.ProcessingStatus.MANUALY_FIXED;
 import static navrat.name.vivicta.model.ProcessingStatus.PENDING_MANUAL;
 
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,6 +16,7 @@ import navrat.name.vivicta.config.LezeniClient;
 import navrat.name.vivicta.dto.TransactionDto;
 import navrat.name.vivicta.mapper.TransactionMapper;
 import navrat.name.vivicta.model.ProcessingStatus;
+import navrat.name.vivicta.model.Transaction;
 import navrat.name.vivicta.repository.TransactionRepository;
 
 @Slf4j
@@ -37,31 +39,29 @@ public class KafkaTransactionConsumer {
 
     @KafkaListener(topics = "new-transactions", groupId = "transaction-group")
     public void consume(TransactionDto dto) {
-        if (isEligibleForAutoProcessing(dto)) {
-            String url = BASE_URL + dto.getVariableSymbol() + "/" + dto.getAmount();
+        Transaction entity = transactionRepository
+                .findByTransactionNumberAndTransactionDate(dto.getTransactionNumber(), dto.getTransactionDate())
+                .orElseGet(() -> mapper.toEntity(dto));
 
-            log.info("Processing transaction from Kafka. Calling: {}", url);
-            try {
-                var response = restClient.get()
-                        .uri(url)
-                        .retrieve()
-                        .toEntity(String.class); // Předpokládáme, že odpověď je text/JSON
+        log.info("Processing transaction {}. Current status: {}",
+                dto.getTransactionNumber(), entity.getProcessingStatus());
 
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    updateTransactionStatus(dto, AUTO_PROCESSED);
-                    log.info("External API call successful. Status: {}, Body: {}", response.getStatusCode(), response.getBody());
-                } else {
-                    updateTransactionStatus(dto, AUTO_FAILED);
-                    log.warn("External API returned error status: {}. Body: {}", response.getStatusCode(), response.getBody());
-                }
-            } catch (Exception e) {
-                updateTransactionStatus(dto, AUTO_FAILED);
-                log.error("Failed to call external API for transaction {}: {}", dto.getTransactionNumber(), e.getMessage());
-            }
-        } else {
-            updateTransactionStatus(dto, PENDING_MANUAL);
-            log.info("Transaction {} is not eligible for processing.", dto.getTransactionNumber());
+        // Use Case 2: Manuálně opraveno v UI
+        if (PENDING_MANUAL.equals(dto.getProcessingStatus())) {
+            log.info("Manual fix detected for {}. Forcing API call.", dto.getTransactionNumber());
+            executeApiCallAndSetStatus(entity, dto,MANUALY_FIXED);
         }
+        // Use Case 1: Nová transakce k analýze
+        else if (isEligibleForAutoProcessing(dto)) {
+            executeApiCallAndSetStatus(entity, dto, AUTO_PROCESSED);
+        }
+        else {
+            entity.setProcessingStatus(PENDING_MANUAL);
+        }
+
+        transactionRepository.save(entity);
+        log.info("Transaction {} saved with final status {}",
+                entity.getTransactionNumber(), entity.getProcessingStatus());
     }
 
     private boolean isEligibleForAutoProcessing(TransactionDto dto) {
@@ -69,13 +69,18 @@ public class KafkaTransactionConsumer {
                 && dto.getVariableSymbol() != null && dto.getVariableSymbol() > 10000;
     }
 
-    private void updateTransactionStatus(TransactionDto dto, ProcessingStatus status) {
-        transactionRepository.findByTransactionNumberAndTransactionDate(
-                        dto.getTransactionNumber(), dto.getTransactionDate())
-                .ifPresent(entity -> {
-                    entity.setProcessingStatus(status);
-                    transactionRepository.save(entity);
-                    log.info("Transaction {} updated to status {}", dto.getTransactionNumber(), status);
-                });
+    private void executeApiCallAndSetStatus(Transaction entity, TransactionDto dto, ProcessingStatus processingStatus) {
+        String url = BASE_URL + dto.getVariableSymbol() + "/" + dto.getAmount();
+        try {
+            var response = restClient.get().uri(url).retrieve().toEntity(String.class);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                entity.setProcessingStatus(processingStatus);
+            } else {
+                entity.setProcessingStatus(AUTO_FAILED);
+            }
+        } catch (Exception e) {
+            log.error("API call failed for {}: {}", dto.getTransactionNumber(), e.getMessage());
+            entity.setProcessingStatus(AUTO_FAILED);
+        }
     }
 }

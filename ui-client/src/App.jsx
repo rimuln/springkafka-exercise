@@ -51,7 +51,7 @@ const handleSync = () => {
 
   const handleIgnore = (index) => {
     const updatedTransactions = [...transactions];
-    updatedTransactions[index].processingStatus = IGNORE;
+    updatedTransactions[index].processingStatus = 'IGNORE';
     updatedTransactions[index].isDirty =true;
     setTransactions(updatedTransactions);
   };
@@ -75,8 +75,8 @@ const handleSync = () => {
     })
     .then(response => {
       if (response.ok) {
-        alert('Transakce byla odeslána k novému zpracování (přes Kafku)');
-        setTransactions(transactions.filter(t => t.transactionNumber !== transaction.transactionNumber));
+        alert('Transakce byla odeslána k novému zpracování.');
+        setTransactions(prev => prev.filter(t => t.id !== transaction.id));
       } else {
         alert('Chyba při odesílání');
       }
@@ -114,7 +114,7 @@ const handleSync = () => {
           </thead>
           <tbody>
             {transactions.map((t,index) => (
-              <tr key={t.transactionNumber}>
+              <tr key={t.id}>
                 <td>{t.transactionDate}</td>
                 <td>{t.transactionNumber}</td>
                 <td style={{ color: t.amount < 0 ? 'red' : 'green' }}>
@@ -135,6 +135,9 @@ const handleSync = () => {
                 </td>
               </tr>
             ))}
+            {transactions.length === 0 && (
+              <tr><td colSpan="6" style={{ textAlign: 'center' }}>Žádné nové transakce.</td></tr>
+            )}
           </tbody>
         </table>
       )}

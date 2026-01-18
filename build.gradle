@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.0.0'
 	id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.openrewrite.rewrite' version '7.23.0'
 }
 
 group = 'navrat.name'
@@ -46,9 +47,22 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    rewrite 'org.openrewrite.recipe:rewrite-spring:6.22.1'
+    rewrite 'org.openrewrite.recipe:rewrite-static-analysis:1.19.0'
+}
+
+rewrite {
+    activeRecipe(
+            'org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0',
+            'org.openrewrite.staticanalysis.CommonStaticAnalysis'
+    )
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.withType(Test).configureEach {jvmArgs("-XX:+EnableDynamicAgentLoading")
 }

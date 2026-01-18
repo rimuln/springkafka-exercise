@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static navrat.name.vivicta.utils.DtoTestFactory.createTransactionDto;
 import static navrat.name.vivicta.utils.EntityTestFactory.createTransactionEntity;
 

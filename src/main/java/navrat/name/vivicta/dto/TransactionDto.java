@@ -30,7 +30,7 @@ public class TransactionDto {
     private ProcessingStatus processingStatus;
 
     public boolean isOutcome() {
-        return creditDebitFlag > 4;
+        return creditDebitFlag != null && creditDebitFlag > 4;
     }
 
     public void negateAmount() {

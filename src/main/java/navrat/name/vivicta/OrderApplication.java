@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication(scanBasePackages = {"navrat.name.vivicta"})
 public class OrderApplication {
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
         SpringApplication.run(OrderApplication.class, args);
 	}
 }

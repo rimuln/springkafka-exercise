@@ -68,6 +68,7 @@ rewrite {
 
 tasks.named('test') {
     useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
 }
 
 tasks.withType(Test).configureEach {jvmArgs("-XX:+EnableDynamicAgentLoading")

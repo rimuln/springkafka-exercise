@@ -6,21 +6,11 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.client.RestClient;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-
-import org.springframework.beans.factory.annotation.Qualifier;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 @Configuration
 public class ApplicationConfiguration {
     @Bean
-    public RedisTemplate<String,String> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String,String> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         return redisTemplate;
     }

@@ -39,7 +39,7 @@ public class DtoTestFactory {
         var dto = new TransactionDto();
         dto.setId(UUID.randomUUID());
         dto.setTransactionNumber(number);
-        dto.setTransactionDate(date);
+        dto.setTransactionSentDate(date);
         dto.setCreditDebitFlag(flag);
         dto.setAmount(amount);
         dto.setCurrencyCode(0);

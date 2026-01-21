@@ -7,12 +7,10 @@ import static navrat.name.moneta2lezeni.model.ProcessingStatus.PENDING_MANUAL;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 
 import lombok.extern.slf4j.Slf4j;
-import navrat.name.moneta2lezeni.config.LezeniClient;
 import navrat.name.moneta2lezeni.dto.TransactionDto;
 import navrat.name.moneta2lezeni.mapper.TransactionMapper;
 import navrat.name.moneta2lezeni.model.ProcessingStatus;
@@ -29,7 +27,6 @@ public class KafkaTransactionConsumer {
     private final LezeniApiService lezeniApiService;
 
     public KafkaTransactionConsumer(
-            @LezeniClient RestClient restClient,
             TransactionRepository transactionRepository,
             TransactionMapper mapper,
             LezeniApiService lezeniApiService) {
@@ -41,7 +38,7 @@ public class KafkaTransactionConsumer {
     @KafkaListener(topics = "new-transactions", groupId = "transaction-group")
     public void consume(TransactionDto dto) {
         Transaction entity = transactionRepository
-                .findByTransactionNumberAndTransactionDate(dto.getTransactionNumber(), dto.getTransactionDate())
+                .findByTransactionNumberAndTransactionSentDate(dto.getTransactionNumber(), dto.getTransactionSentDate())
                 .orElseGet(() -> mapper.toEntity(dto));
 
         log.info("Processing transaction {}. Current status: {}",
@@ -74,7 +71,7 @@ public class KafkaTransactionConsumer {
 
     private boolean isEligibleForAutoProcessing(TransactionDto dto) {
         return dto.getAmount() != null && dto.getAmount().compareTo(BigDecimal.valueOf(50)) > 0
-                && dto.getVariableSymbol() != null && dto.getVariableSymbol() > 10000;
+                && dto.getVariableSymbol() != null && dto.getVariableSymbol() > 10000 && dto.getVariableSymbol() < 99999;
     }
 
     private void processWithApi(Transaction entity, TransactionDto dto, ProcessingStatus successStatus) {

@@ -28,7 +28,7 @@ public class MonetaTransparentAccountController {
        return ResponseEntity.ok().build();
     }
 
-    ResponseEntity<Void> syncRateLimitFallback(String accountName, Throwable t) {
+    public ResponseEntity<Void> syncRateLimitFallback(String accountName, Throwable t) {
         return ResponseEntity.status(TOO_MANY_REQUESTS).build();
     }
 }

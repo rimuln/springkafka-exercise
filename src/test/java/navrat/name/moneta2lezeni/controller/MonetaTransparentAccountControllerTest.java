@@ -20,16 +20,16 @@ class MonetaTransparentAccountControllerTest {
     private RestTestClient restTestClient;
 
     @MockitoBean
-    private SynchronizeTransactionService orchestratorService;
+    private SynchronizeTransactionService synchronizeTransactionService;
     @Test
     void shouldTriggerSyncAndReturnOk() throws Exception {
         String accountNumber = "246594777";
 
         restTestClient.get().uri("/moneta/" + accountNumber)
                 .exchangeSuccessfully()
-                .expectBody(String.class)
-                .isEqualTo("OK");
+                .expectStatus().isOk()
+                .expectBody().isEmpty();
 
-        verify(orchestratorService).syncTransactions(accountNumber);
+        verify(synchronizeTransactionService).syncTransactions(accountNumber);
     }
 }

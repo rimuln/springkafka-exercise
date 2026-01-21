@@ -32,7 +32,7 @@ class TransactionRepositoryTest {
         entityManager.persistAndFlush(t);
 
         Optional<Transaction> found = repositoryUnderTest
-                .findByTransactionNumberAndTransactionDate(123, date);
+                .findByTransactionNumberAndTransactionSentDate(123, date);
 
         assertThat(found).isPresent();
         assertThat(found.get().getAccountName()).isEqualTo("Test Account");

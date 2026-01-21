@@ -1,46 +1,190 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Globální reset a kontejner */
+.container {
+  /* Změna: už není na střed, ale na celou šířku s okrajem */
+  width: 90%;
+  padding: 20px 40px;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #333;
+  box-sizing: border-box;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Kontejner pro tabulku, který umožní overlay */
+.table-wrapper {
+  position: relative;
+  min-height: 200px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Jemné zešednutí tabulky při načítání */
+.table-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  font-weight: bold;
+  color: #2196F3;
+  backdrop-filter: blur(1px); /* Jemné rozmazání pozadí */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  color: #1a1a1a;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
 }
 
-.card {
-  padding: 2em;
+/* Toolbar s tlačítky */
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 30px;
 }
 
-.read-the-docs {
-  color: #888;
+/* Základní styl tlačítek (Button.jsx) */
+.btn-base {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.btn-base:disabled {
+  background-color: #e0e0e0 !important;
+  color: #9e9e9e !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-base:active {
+  transform: translateY(1px);
+}
+
+/* Specifické barvy tlačítek */
+.btn-manual {
+  background-color: #2196F3;
+  color: white;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+}
+
+.btn-manual:hover {
+  background-color: #1976D2;
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+}
+
+.btn-sync {
+  background-color: #4CAF50;
+  color: white;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.btn-sync:hover:not(:disabled) {
+  background-color: #43a047;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+}
+
+/* Tabulková tlačítka */
+.btn-ignore {
+  background-color: #f5f5f5;
+  color: #666;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-ignore:hover { background-color: #eeeeee; }
+
+.btn-ignore.active {
+  background-color: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+.btn-update {
+  padding: 6px 12px;
+  font-size: 12px;
+  background-color: #f5f5f5;
+  color: #999;
+}
+
+.btn-update.active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+/* Fixní tabulka */
+.fixed-table {
+  width: 100%;
+  table-layout: fixed; /* Klíčové pro stabilitu */
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.fixed-table th {
+  background-color: #f8f9fa;
+  color: #555;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 15px;
+  border-bottom: 2px solid #eee;
+  text-align: left;
+}
+
+.fixed-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.fixed-table tr:hover {
+  background-color: #fafafa;
+}
+
+/* Ošetření textu zprávy */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: #666;
+  font-size: 13px;
+}
+
+/* Inputy v tabulce */
+.vs-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.vs-input:focus {
+  border-color: #2196F3;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+/* Status Banner (Notifikace) */
 .status-banner {
   position: fixed;
   top: 20px;
@@ -52,15 +196,20 @@
   font-weight: bold;
   z-index: 9999;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: all 0.3s ease;
   animation: slideDown 0.4s ease-out;
 }
 
-.status-banner.success { background-color: #4caf50; }
-.status-banner.error { background-color: #f44336; }
-.status-banner.info { background-color: #2196f3; }
+.status-banner.success { background-color: #43a047; }
+.status-banner.error { background-color: #d32f2f; }
+.status-banner.info { background-color: #1976D2; }
 
 @keyframes slideDown {
   from { top: -60px; opacity: 0; }
   to { top: 20px; opacity: 1; }
+}
+
+/* Mezera mezi tlačítky v tabulce */
+.action-buttons {
+  display: flex;
+  gap: 8px;
 }

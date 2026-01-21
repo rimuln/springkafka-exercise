@@ -40,3 +40,27 @@
 .read-the-docs {
   color: #888;
 }
+
+.status-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  animation: slideDown 0.4s ease-out;
+}
+
+.status-banner.success { background-color: #4caf50; }
+.status-banner.error { background-color: #f44336; }
+.status-banner.info { background-color: #2196f3; }
+
+@keyframes slideDown {
+  from { top: -60px; opacity: 0; }
+  to { top: 20px; opacity: 1; }
+}

@@ -25,3 +25,29 @@ spring:
 
   redis:
     host: ${SPRING_REDIS_HOST:localhost}
+
+  resilience4j:
+    circuitbreaker:
+      instances:
+        lezeniApi:
+          registerHealthIndicator: true
+          slidingWindowSize: 10
+          minimumNumberOfCalls: 5
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10000
+          permittedNumberOfCallsInHalfOpenState: 3
+
+    ratelimiter:
+      instances:
+        monetaSync:
+          limitForPeriod: 1
+          limitRefreshPeriod: 10s
+          timeoutDuration: 0
+
+api:
+  moneta:
+    base-url: https://transparentniucty.moneta.cz/api/v1
+    endpoint-statement: /accountDetail
+  lezeni:
+    base-url: https://lezeni.navrat.name/api/rest
+    endpoint-platba: /prezence/platba/{vs}/{amount}

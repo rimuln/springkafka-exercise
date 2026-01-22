@@ -1,14 +1,22 @@
+import { logger } from '../services/logger';
+
 const BASE_URL = '/api';
 
 async function handleResponse(response) {
   if (response.status === 429) {
     throw new Error('RATE_LIMIT');
   }
+
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || 'API_ERROR');
   }
-  if (response.status === 204) {
+
+  const contentType = response.headers.get("content-type");
+  const contentLength = response.headers.get("content-length");
+
+  if (response.status === 204 || contentLength === "0" || !contentType || !contentType.includes("application/json")) {
+    logger.debug('Response is success but empty (no JSON to parse)');
     return null;
   }
   return response.json();

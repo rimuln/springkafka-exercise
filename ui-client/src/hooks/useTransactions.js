@@ -1,3 +1,4 @@
+import { logger } from '../services/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 
@@ -16,6 +17,7 @@ export const useTransactions = () => {  const [transactions, setTransactions] = 
       const data = await api.fetchTransactions();
       setTransactions(data);
     } catch (error) {
+      logger.error('Fetch transactions failed:', error);
       showMessage('Nepodařilo se načíst transakce.', 'error');
     } finally {
       setLoading(false);
@@ -34,6 +36,7 @@ export const useTransactions = () => {  const [transactions, setTransactions] = 
       showMessage('Data z banky byla úspěšně stažena.', 'success');
       await refresh();
     } catch (error) {
+      logger.error('Sync failed:', error);
       const msg = error.message === 'RATE_LIMIT'
         ? 'Zpomalte! Další synchronizace možná za chvíli.'
         : 'Bankovní API je momentálně nedostupné.';
@@ -49,6 +52,7 @@ export const useTransactions = () => {  const [transactions, setTransactions] = 
       showMessage('Změny byly odeslány ke zpracování.', 'success');
       setTransactions(prev => prev.filter(t => t.id !== transaction.id));
     } catch (error) {
+      logger.error('update transaction failed:', error);
       showMessage('Chyba při ukládání transakce.', 'error');
     }
   };

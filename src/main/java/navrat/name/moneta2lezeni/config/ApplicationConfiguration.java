@@ -3,6 +3,7 @@ package navrat.name.moneta2lezeni.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.client.RestClient;
@@ -26,9 +27,12 @@ public class ApplicationConfiguration {
 
     @Bean
     @LezeniClient
-    public RestClient lezeniClient(RestClient.Builder builder,@Value("${api.lezeni.base-url}") String baseUrl) {
+    public RestClient lezeniClient(RestClient.Builder builder,
+                                   @Value("${api.lezeni.base-url}") String baseUrl,
+                                   @Value("${api.lezeni.api-token}") String apiToken) {
         return builder
                 .baseUrl(baseUrl)
+                .defaultHeader("X-Api-Token", apiToken)
                 .build();
     }
 }

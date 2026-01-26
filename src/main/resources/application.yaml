@@ -26,23 +26,32 @@ spring:
   redis:
     host: ${SPRING_REDIS_HOST:localhost}
 
-  resilience4j:
-    circuitbreaker:
-      instances:
-        lezeniApi:
-          registerHealthIndicator: true
-          slidingWindowSize: 10
-          minimumNumberOfCalls: 5
-          failureRateThreshold: 50
-          waitDurationInOpenState: 10000
-          permittedNumberOfCallsInHalfOpenState: 3
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        recordExceptions:
+          - java.lang.Exception
+    instances:
+      lezeniApi:
+        baseConfig: default
 
-    ratelimiter:
-      instances:
-        monetaSync:
-          limitForPeriod: 1
-          limitRefreshPeriod: 10s
-          timeoutDuration: 0
+  ratelimiter:
+    configs:
+      default:
+        limitForPeriod: 1
+        limitRefreshPeriod: 10s
+        timeoutDuration: 0s
+    instances:
+      monetaSync:
+        baseConfig: default
 
 api:
   moneta:
@@ -51,3 +60,23 @@ api:
   lezeni:
     base-url: https://lezeni.navrat.name/api/rest
     endpoint-platba: /prezence/platba/{vs}/{amount}
+    api-token: ${LEZENI_API_TOKEN}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,circuitbreakers,ratelimiters,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+
+logging:
+  level:
+    io.github.resilience4j: DEBUG
+    navrat.name.moneta2lezeni: DEBUG

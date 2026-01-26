@@ -52,7 +52,7 @@ dependencies {
   //implementation "io.github.resilience4j:resilience4j-spring-boot4:${resilience4jVersion}"
 
   //docasna verze
-  implementation  "ccom.github.rimuln.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
+  implementation  "com.github.rimuln.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
   implementation  "com.github.rimuln.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
   implementation  "com.github.rimuln.resilience4j:resilience4j-spring-boot4:${resilience4jVersion}"
 

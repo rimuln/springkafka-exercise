@@ -1,25 +1,45 @@
 import React from 'react';
 import { IgnoreButton, FixButton } from './ActionButtons';
+import type { Transaction } from '../types/transaction';
 
-const TransactionTable = ({ transactions, loading, onTransactionsChange, onUpdate }) => {
+interface TransactionTableProps {
+  transactions: Transaction[];
+  loading: boolean;
+  onTransactionsChange: (updatedTransactions: Transaction[]) => void;
+  onUpdate: (transaction: Transaction) => void;
+}
 
-  const handleVsChange = (index, newValue) => {
+const TransactionTable: React.FC<TransactionTableProps> = ({
+  transactions,
+  loading,
+  onTransactionsChange,
+  onUpdate
+}) => {
+
+  const handleVsChange = (index: number, newValue: string) => {
     const updated = [...transactions];
-    updated[index].variableSymbol = newValue;
-    updated[index].isDirty = true;
+    // Převedeme string na number | null pro variableSymbol
+    const vsValue = newValue ? parseInt(newValue, 10) : null;
+    updated[index] = {
+      ...updated[index],
+      variableSymbol: vsValue,
+      isDirty: true
+    };
     onTransactionsChange(updated);
   };
 
-  const handleIgnore = (index) => {
+  const handleIgnore = (index: number) => {
     const updated = [...transactions];
-    updated[index].processingStatus = 'IGNORE';
-    updated[index].isDirty = true;
+    updated[index] = {
+      ...updated[index],
+      processingStatus: 'IGNORE',
+      isDirty: true
+    };
     onTransactionsChange(updated);
   };
 
   return (
     <div className="table-wrapper">
-      {/* Overlay se zobrazí PŘES tabulku, takže tabulka pod ním nezmizí */}
       {loading && (
         <div className="table-loading-overlay">
           <span>Aktualizuji data...</span>
@@ -45,7 +65,7 @@ const TransactionTable = ({ transactions, loading, onTransactionsChange, onUpdat
               <td style={{ color: t.amount < 0 ? 'red' : 'green', fontWeight: 'bold' }}>
                 {t.amount} {t.currencyCode === 0 ? 'CZK' : t.currencyCode}
               </td>
-              <td title={`${t.counterpartyAccountName}, ${t.messageForRecipient}`}>
+              <td title={`${t.counterpartyAccountName || ''}, ${t.messageForRecipient || ''}`}>
                 <div className="text-truncate">
                   {t.counterpartyAccountName}, {t.messageForRecipient}
                 </div>
@@ -74,7 +94,7 @@ const TransactionTable = ({ transactions, loading, onTransactionsChange, onUpdat
           ))}
           {!loading && transactions.length === 0 && (
             <tr>
-              <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+              <td colSpan={6} style={{ textAlign: 'center', padding: '20px' }}>
                 Žádné nové transakce k vyřízení.
               </td>
             </tr>

@@ -1,12 +1,15 @@
 import { logger } from '../services/logger';
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
+import type { Transaction } from '../types/transaction';
+import type { StatusType } from '../types/statusType';
 
-export const useTransactions = () => {  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState({ message: '', type: '' });
+export const useTransactions = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [status, setStatus] = useState<{ message: string; type: StatusType }>({ message: '', type: '' });
 
-  const showMessage = useCallback((message, type = 'info') => {
+  const showMessage = useCallback((message: string, type: StatusType = 'info') => {
     setStatus({ message, type });
     setTimeout(() => setStatus({ message: '', type: '' }), 5000);
   }, []);
@@ -35,7 +38,7 @@ export const useTransactions = () => {  const [transactions, setTransactions] = 
       await api.syncWithBank();
       showMessage('Data z banky byla úspěšně stažena.', 'success');
       await refresh();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Sync failed:', error);
       const msg = error.message === 'RATE_LIMIT'
         ? 'Zpomalte! Další synchronizace možná za chvíli.'
@@ -46,11 +49,11 @@ export const useTransactions = () => {  const [transactions, setTransactions] = 
     }
   };
 
-  const handleUpdate = async (transaction) => {
+  const handleUpdate = async (transaction: Transaction) => {
     try {
       await api.updateTransaction(transaction);
       showMessage('Změny byly odeslány ke zpracování.', 'success');
-      setTransactions(prev => prev.filter(t => t.id !== transaction.id));
+      setTransactions(prev => prev.filter((t: Transaction) => t.id !== transaction.id));
     } catch (error) {
       logger.error('update transaction failed:', error);
       showMessage('Chyba při ukládání transakce.', 'error');

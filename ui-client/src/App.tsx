@@ -1,17 +1,23 @@
-import { useState } from 'react'
+import React, { useState } from 'react';
 import ManualTransactionDialog from './components/ManualTransactionDialog';
 import StatusBanner from './components/StatusBanner';
 import TransactionTable from './components/TransactionTable';
 import { ManualTransactionButton, SyncButton } from './components/ActionButtons';
 import { useTransactions } from './hooks/useTransactions';
-import './App.css'
+import './App.css';
 
-function App() {
+const App: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const {
-    transactions, setTransactions, loading, status,
-    showMessage, handleSync, handleUpdate, refresh
+    transactions,
+    setTransactions,
+    loading,
+    status,
+    showMessage,
+    handleSync,
+    handleUpdate,
+    refresh
   } = useTransactions();
 
   return (
@@ -39,7 +45,7 @@ function App() {
         onShowMessage={showMessage}
       />
     </div>
-  )
-}
+  );
+};
 
 export default App;

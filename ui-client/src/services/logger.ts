@@ -1,6 +1,15 @@
 const isDev = import.meta.env.DEV;
 
-export const logger = {
+type LogFunction = (message: string, ...args: unknown[]) => void;
+
+interface Logger {
+  info: LogFunction;
+  warn: LogFunction;
+  error: LogFunction;
+  debug: LogFunction;
+}
+
+export const logger: Logger = {
   info: (message, ...args) => {
     if (isDev) console.log(`%c[INFO] ${message}`, 'color: #2196F3; font-weight: bold', ...args);
   },

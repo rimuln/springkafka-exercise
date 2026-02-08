@@ -1,8 +1,9 @@
 import { logger } from '../services/logger';
+import type { Transaction } from '../types/transaction';
 
 const BASE_URL = '/api';
 
-async function handleResponse(response) {
+async function handleResponse<T>(response: Response): Promise<T | null> {
   if (response.status === 429) {
     throw new Error('RATE_LIMIT');
   }
@@ -23,18 +24,19 @@ async function handleResponse(response) {
 }
 
 export const api = {
-  fetchTransactions: () =>
-    fetch(`${BASE_URL}/transactions`).then(handleResponse),
+  fetchTransactions: (): Promise<Transaction[]> =>
+    fetch(`${BASE_URL}/transactions`).then(res => handleResponse<Transaction[]>(res))
+      .then(data => data || []),
 
-  syncWithBank: (accountNumber = '246594777') =>
-    fetch(`${BASE_URL}/moneta/${accountNumber}`).then(handleResponse),
+  syncWithBank: (accountNumber: string = '246594777'): Promise<void> =>
+    fetch(`${BASE_URL}/moneta/${accountNumber}`).then(res => handleResponse<void>(res)),
 
-  updateTransaction: (transaction) => {
+  updateTransaction: (transaction: Transaction): Promise<Transaction> => {
     const payload = {
       id: transaction.id,
-      variableSymbol: parseInt(transaction.variableSymbol, 10),
+      variableSymbol: transaction.variableSymbol ? parseInt(transaction.variableSymbol.toString(), 10) : null,
       transactionSentDate: transaction.transactionSentDate,
-      transactionNumber: parseInt(transaction.transactionNumber),
+      transactionNumber: transaction.transactionNumber ? parseInt(transaction.transactionNumber.toString(), 10) : 0,
       processingStatus: transaction.processingStatus
     };
 
@@ -42,14 +44,15 @@ export const api = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    }).then(handleResponse);
+    }).then(res => handleResponse<Transaction>(res))
+      .then(data => data!);
   },
 
-  // POST: Ruční vložení
-  createManualTransaction: (data) =>
+  createManualTransaction: (data: Partial<Transaction>): Promise<Transaction> =>
     fetch(`${BASE_URL}/transactions/manual`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    }).then(handleResponse)
+    }).then(res => handleResponse<Transaction>(res))
+      .then(data => data!)
 };

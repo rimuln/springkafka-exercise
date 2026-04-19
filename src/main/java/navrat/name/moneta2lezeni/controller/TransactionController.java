@@ -52,8 +52,10 @@ public class TransactionController {
         dto.setAccountName("ČESKÝ HOROLEZECKÝ");
 
         if (dto.getTransactionSentDate() == null) {
-            dto.setTransactionDate(LocalDate.now());
             dto.setTransactionSentDate(LocalDate.now());
+        }
+        if (dto.getTransactionDate() == null) {
+            dto.setTransactionDate(dto.getTransactionSentDate());
         }
         transactionService.sendManualTransaction(dto);
         return ResponseEntity.ok().build();

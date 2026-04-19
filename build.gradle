@@ -24,20 +24,13 @@ configurations {
 }
 
 repositories {
-  maven {
-    url uri("https://jitpack.io")
-    metadataSources {
-      mavenPom()
-      artifact()
-    }
-  }
   mavenLocal()
   mavenCentral()
 }
 
 ext {
   set('springCloudVersion', "2025.1.0")
-  set('resilience4jVersion',"6051fe993d")
+  set('resilience4jVersion', "2.4.0")
 }
 
 dependencies {
@@ -51,15 +44,9 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-aspectj'
   implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-  // oficialni verze
-  //implementation "io.github.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
-  //implementation "io.github.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
-  //implementation "io.github.resilience4j:resilience4j-spring-boot4:${resilience4jVersion}"
-
-  //docasna verze
-  implementation  "com.github.rimuln.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
-  implementation  "com.github.rimuln.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
-  implementation  "com.github.rimuln.resilience4j:resilience4j-spring-boot4:${resilience4jVersion}"
+  implementation "io.github.resilience4j:resilience4j-circuitbreaker:${resilience4jVersion}"
+  implementation "io.github.resilience4j:resilience4j-ratelimiter:${resilience4jVersion}"
+  implementation "io.github.resilience4j:resilience4j-spring-boot4:${resilience4jVersion}"
 
   //needed by Kafka
   implementation 'com.fasterxml.jackson.core:jackson-databind'

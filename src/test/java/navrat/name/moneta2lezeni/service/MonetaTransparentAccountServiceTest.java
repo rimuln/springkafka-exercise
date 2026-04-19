@@ -62,6 +62,30 @@ class MonetaTransparentAccountServiceTest {
     }
 
     @Test
+    void fetchAllTransactions_shouldNotStopOnSameTxNumAndSentDateButDifferentTransactionDate() {
+        // Regression for bugfix-moneta-pagination.md:
+        // newest in DB has (txNum=1, transactionDate=2026-04-12, sentDate=2026-04-13).
+        // API page also contains (txNum=1, transactionDate=2026-04-13, sentDate=2026-04-13)
+        // — same (txNum, sentDate), different transactionDate. Must NOT be treated as duplicate.
+        var accountName = "246594777";
+        var sentDate = LocalDate.of(2026, 4, 13);
+        var newestInDb = createTransactionDto(1, LocalDate.of(2026, 4, 12), sentDate);
+
+        var t13_2 = createTransactionDto(2, LocalDate.of(2026, 4, 13), sentDate);
+        var t13_1 = createTransactionDto(1, LocalDate.of(2026, 4, 13), sentDate);
+        var page = createAccountStatementDto(List.of(t13_2, t13_1), "Y");
+
+        mockRestClientCall(page);
+
+        List<TransactionDto> result = serviceUnderTest.fetchAllTransactions(accountName, newestInDb);
+
+        assertEquals(2, result.size(),
+                "Both transactions must be kept — same (txNum, sentDate) but different transactionDate is not a duplicate");
+        assertEquals(2, result.get(0).getTransactionNumber());
+        assertEquals(1, result.get(1).getTransactionNumber());
+    }
+
+    @Test
     void fetchAllTransactions_shouldStopAndSliceWhenDuplicateFound() {
         var accountName = "246594777";
         var date = LocalDate.of(2026, 1, 1);

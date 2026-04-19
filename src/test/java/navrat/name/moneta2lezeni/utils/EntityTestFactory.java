@@ -45,6 +45,7 @@ public class EntityTestFactory {
         var entity = new Transaction();
         entity.setId(UUID.randomUUID());
         entity.setTransactionNumber(number);
+        entity.setTransactionDate(date);
         entity.setTransactionSentDate(date);
         entity.setAmount(BigDecimal.valueOf(100));
         entity.setCreditDebitFlag(4);

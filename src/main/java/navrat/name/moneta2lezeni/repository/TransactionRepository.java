@@ -11,5 +11,9 @@ import navrat.name.moneta2lezeni.model.Transaction;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID>, QuerydslPredicateExecutor<Transaction> {
     Optional<Transaction> findByTransactionNumberAndTransactionSentDate(Integer transactionNumber, LocalDate transactionDate);
-    Optional<Transaction> findFirstByOrderByTransactionDateDescTransactionNumberDesc();
+
+    // Manual transactions can have null transactionDate / transactionNumber; those rows must
+    // not pollute the Moneta-sync cursor (filter in MonetaTransparentAccountService relies on
+    // all three fields being non-null).
+    Optional<Transaction> findFirstByTransactionDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionDateDescTransactionNumberDesc();
 }

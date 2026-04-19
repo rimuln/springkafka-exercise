@@ -56,6 +56,7 @@ public class MonetaTransparentAccountService {
                 if (newestTransaction != null) {
                     duplicate = currentTransactions.stream()
                             .filter(t -> t.getTransactionNumber().equals(newestTransaction.getTransactionNumber())
+                                    && t.getTransactionDate().equals(newestTransaction.getTransactionDate())
                                     && t.getTransactionSentDate().equals(newestTransaction.getTransactionSentDate()))
                             .findFirst();
                 }

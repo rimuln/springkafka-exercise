@@ -39,12 +39,18 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    void findFirstByOrderByTransactionDateDescTransactionNumberDesc_shouldReturnNewest() {
+    void findFirstByTransactionDateIsNotNull_shouldReturnNewestAndIgnoreNullDateRows() {
+        // Manual transactions can have null transactionDate / transactionNumber.
+        // PostgreSQL puts NULLs first in ORDER BY DESC, so without the IsNotNull guard
+        // these rows would shadow real Moneta transactions and break the sync cursor.
         createAndPersist("Starší", LocalDate.of(2026, 1, 10), 10);
         createAndPersist("Novější stejný den", LocalDate.of(2026, 1, 17), 5);
         createAndPersist("Nejnovější", LocalDate.of(2026, 1, 17), 99);
+        createAndPersist("Manualni s NULL date", null, null);
+        createAndPersist("Manualni s NULL number", LocalDate.of(2026, 1, 18), null);
 
-        Optional<Transaction> result = repositoryUnderTest.findFirstByOrderByTransactionDateDescTransactionNumberDesc();
+        Optional<Transaction> result = repositoryUnderTest
+                .findFirstByTransactionDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionDateDescTransactionNumberDesc();
 
         assertThat(result).isPresent();
         assertThat(result.get().getAccountName()).isEqualTo("Nejnovější");

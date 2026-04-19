@@ -40,3 +40,5 @@ out/
 /local-libs
 /setup-sonar-env.cmd
 /.claude/
+/id_rsa
+/id_rsa.pub

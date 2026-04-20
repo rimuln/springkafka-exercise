@@ -34,8 +34,10 @@ export const api = {
       .then((res) => handleResponse<Transaction[]>(res))
       .then((data) => data || []),
 
-  syncWithBank: (accountNumber: string = '246594777'): Promise<void> =>
-    fetch(`${BASE_URL}/moneta/${accountNumber}`).then((res) => handleResponse<void>(res)),
+  syncWithBank: async (accountNumber: string = '246594777'): Promise<void> => {
+    const res = await fetch(`${BASE_URL}/moneta/${accountNumber}`);
+    await handleResponse<void>(res);
+  },
 
   updateTransaction: (transaction: Transaction): Promise<Transaction> => {
     const payload = {

@@ -10,7 +10,7 @@ interface ManualTransactionDialogProps {
   onShowMessage: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
-const today = () => new Date().toISOString().split('T')[0];
+const today = (): string => new Date().toISOString().slice(0, 10);
 
 const parseVs = (raw: string): number | null => {
   if (raw.trim() === '') return null;

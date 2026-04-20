@@ -98,8 +98,11 @@ jobs:
       - name: ESLint
         run: npm run lint
 
+      - name: TypeScript check
+        run: npm run typecheck
+
       - name: Vitest
-        run: npm test -- --run
+        run: npm test
 
       - name: npm audit (high+ fails build)
         run: npm run audit:ci

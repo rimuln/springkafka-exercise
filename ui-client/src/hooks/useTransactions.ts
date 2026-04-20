@@ -1,73 +1,85 @@
+import { useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { logger } from '../services/logger';
-import { useState, useEffect, useCallback } from 'react';
 import { api } from '../services/api';
 import type { Transaction } from '../types/transaction';
 import type { StatusType } from '../types/statusType';
 
-export const useTransactions = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [status, setStatus] = useState<{ message: string; type: StatusType }>({ message: '', type: '' });
+const TRANSACTIONS_KEY = ['transactions'] as const;
 
-  const showMessage = useCallback((message: string, type: StatusType = 'info') => {
+export const useTransactions = () => {
+  const queryClient = useQueryClient();
+  const [status, setStatus] = useState<{ message: string; type: StatusType }>({ message: '', type: '' });
+  const dismissTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const showMessage = (message: string, type: StatusType = 'info') => {
+    if (dismissTimer.current) clearTimeout(dismissTimer.current);
     setStatus({ message, type });
-    setTimeout(() => setStatus({ message: '', type: '' }), 5000);
+    dismissTimer.current = setTimeout(() => setStatus({ message: '', type: '' }), 5000);
+  };
+
+  useEffect(() => () => {
+    if (dismissTimer.current) clearTimeout(dismissTimer.current);
   }, []);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.fetchTransactions();
-      setTransactions(data);
-    } catch (error) {
-      logger.error('Fetch transactions failed:', error);
-      showMessage('Nepodařilo se načíst transakce.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [showMessage]);
+  const transactionsQuery = useQuery({
+    queryKey: TRANSACTIONS_KEY,
+    queryFn: async () => {
+      try {
+        return await api.fetchTransactions();
+      } catch (error: unknown) {
+        logger.error('Fetch transactions failed:', error);
+        showMessage('Nepodařilo se načíst transakce.', 'error');
+        throw error;
+      }
+    },
+  });
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  const handleSync = async () => {
-    setLoading(true);
-    showMessage('Synchronizuji s bankou...', 'info');
-    try {
-      await api.syncWithBank();
+  const syncMutation = useMutation({
+    mutationFn: () => api.syncWithBank(),
+    onMutate: () => showMessage('Synchronizuji s bankou...', 'info'),
+    onSuccess: () => {
       showMessage('Data z banky byla úspěšně stažena.', 'success');
-      await refresh();
-    } catch (error: any) {
+      return queryClient.invalidateQueries({ queryKey: TRANSACTIONS_KEY });
+    },
+    onError: (error: unknown) => {
       logger.error('Sync failed:', error);
-      const msg = error.message === 'RATE_LIMIT'
+      const msg = error instanceof Error && error.message === 'RATE_LIMIT'
         ? 'Zpomalte! Další synchronizace možná za chvíli.'
         : 'Bankovní API je momentálně nedostupné.';
       showMessage(msg, 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
-  const handleUpdate = async (transaction: Transaction) => {
-    try {
-      await api.updateTransaction(transaction);
+  const updateMutation = useMutation({
+    mutationFn: (transaction: Transaction) => api.updateTransaction(transaction),
+    onSuccess: (_data, variables) => {
       showMessage('Změny byly odeslány ke zpracování.', 'success');
-      setTransactions(prev => prev.filter((t: Transaction) => t.id !== transaction.id));
-    } catch (error) {
+      // Optimistic remove from list — backend will re-sync on next fetch.
+      queryClient.setQueryData<Transaction[]>(TRANSACTIONS_KEY, (prev) =>
+        prev ? prev.filter(t => t.id !== variables.id) : prev
+      );
+    },
+    onError: (error: unknown) => {
       logger.error('update transaction failed:', error);
       showMessage('Chyba při ukládání transakce.', 'error');
-    }
+    },
+  });
+
+  const updateLocalTransaction = (next: Transaction) => {
+    queryClient.setQueryData<Transaction[]>(TRANSACTIONS_KEY, (prev) =>
+      prev ? prev.map(t => (t.id === next.id ? next : t)) : prev
+    );
   };
 
   return {
-    transactions,
-    setTransactions,
-    loading,
+    transactions: transactionsQuery.data ?? [],
+    loading: transactionsQuery.isFetching || syncMutation.isPending,
     status,
     showMessage,
-    handleSync,
-    handleUpdate,
-    refresh
+    handleSync: () => syncMutation.mutate(),
+    handleUpdate: (transaction: Transaction) => updateMutation.mutate(transaction),
+    updateLocalTransaction,
+    refresh: () => queryClient.invalidateQueries({ queryKey: TRANSACTIONS_KEY }),
   };
 };

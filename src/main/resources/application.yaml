@@ -23,9 +23,6 @@ spring:
       properties:
         spring.json.trusted.packages: "navrat.name.moneta2lezeni.dto"
 
-  redis:
-    host: ${SPRING_REDIS_HOST:localhost}
-
 resilience4j:
   circuitbreaker:
     configs:

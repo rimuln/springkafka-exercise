@@ -11,13 +11,13 @@ const App: React.FC = () => {
 
   const {
     transactions,
-    setTransactions,
     loading,
     status,
     showMessage,
     handleSync,
     handleUpdate,
-    refresh
+    updateLocalTransaction,
+    refresh,
   } = useTransactions();
 
   return (
@@ -34,7 +34,7 @@ const App: React.FC = () => {
       <TransactionTable
         transactions={transactions}
         loading={loading}
-        onTransactionsChange={setTransactions}
+        onLocalChange={updateLocalTransaction}
         onUpdate={handleUpdate}
       />
 

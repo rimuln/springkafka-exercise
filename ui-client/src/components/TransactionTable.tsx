@@ -5,37 +5,28 @@ import type { Transaction } from '../types/transaction';
 interface TransactionTableProps {
   transactions: Transaction[];
   loading: boolean;
-  onTransactionsChange: (updatedTransactions: Transaction[]) => void;
+  onLocalChange: (transaction: Transaction) => void;
   onUpdate: (transaction: Transaction) => void;
 }
+
+const parseVs = (raw: string): number | null => {
+  if (raw.trim() === '') return null;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) ? n : null;
+};
 
 const TransactionTable: React.FC<TransactionTableProps> = ({
   transactions,
   loading,
-  onTransactionsChange,
-  onUpdate
+  onLocalChange,
+  onUpdate,
 }) => {
-
-  const handleVsChange = (index: number, newValue: string) => {
-    const updated = [...transactions];
-    // Převedeme string na number | null pro variableSymbol
-    const vsValue = newValue ? parseInt(newValue, 10) : null;
-    updated[index] = {
-      ...updated[index],
-      variableSymbol: vsValue,
-      isDirty: true
-    };
-    onTransactionsChange(updated);
+  const handleVsChange = (t: Transaction, raw: string) => {
+    onLocalChange({ ...t, variableSymbol: parseVs(raw), isDirty: true });
   };
 
-  const handleIgnore = (index: number) => {
-    const updated = [...transactions];
-    updated[index] = {
-      ...updated[index],
-      processingStatus: 'IGNORE',
-      isDirty: true
-    };
-    onTransactionsChange(updated);
+  const handleIgnore = (t: Transaction) => {
+    onLocalChange({ ...t, processingStatus: 'IGNORE', isDirty: true });
   };
 
   return (
@@ -58,7 +49,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {transactions.map((t, index) => (
+          {transactions.map((t) => (
             <tr key={t.id}>
               <td>{t.transactionSentDate}</td>
               <td>{t.transactionNumber}</td>
@@ -74,14 +65,14 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                 <input
                   type="text"
                   className="vs-input"
-                  value={t.variableSymbol || ''}
-                  onChange={e => handleVsChange(index, e.target.value)}
+                  value={t.variableSymbol ?? ''}
+                  onChange={e => handleVsChange(t, e.target.value)}
                 />
               </td>
               <td>
                 <div className="action-buttons">
                   <IgnoreButton
-                    onClick={() => handleIgnore(index)}
+                    onClick={() => handleIgnore(t)}
                     isActive={t.processingStatus === 'IGNORE'}
                   />
                   <FixButton

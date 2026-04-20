@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '../services/logger';
 import { api } from '../services/api';
 import type { Transaction } from '../types/transaction';
 
@@ -9,17 +10,25 @@ interface ManualTransactionDialogProps {
   onShowMessage: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
+const today = () => new Date().toISOString().split('T')[0];
+
+const parseVs = (raw: string): number | null => {
+  if (raw.trim() === '') return null;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) ? n : null;
+};
+
 const ManualTransactionDialog: React.FC<ManualTransactionDialogProps> = ({
   isOpen,
   onClose,
   onRefresh,
-  onShowMessage
+  onShowMessage,
 }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<Transaction>>({
     variableSymbol: null,
     amount: 1000,
-    transactionSentDate: new Date().toISOString().split('T')[0]
+    transactionSentDate: today(),
   });
 
   if (!isOpen) return null;
@@ -32,8 +41,8 @@ const ManualTransactionDialog: React.FC<ManualTransactionDialogProps> = ({
       onShowMessage('Transakce byla úspěšně vložena', 'success');
       onRefresh();
       onClose();
-    } catch (error) {
-      console.error('Error creating manual transaction:', error);
+    } catch (error: unknown) {
+      logger.error('Error creating manual transaction:', error);
       onShowMessage('Chyba při odesílání transakce', 'error');
     } finally {
       setLoading(false);
@@ -41,63 +50,52 @@ const ManualTransactionDialog: React.FC<ManualTransactionDialogProps> = ({
   };
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-    }}>
-      <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', width: '350px', color: 'black' }}>
-        <h3 style={{ marginTop: 0 }}>Ruční vložení transakce</h3>
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="manual-tx-title">
+      <div className="modal-card">
+        <h3 id="manual-tx-title" className="modal-title">Ruční vložení transakce</h3>
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '10px' }}>
-            <label style={{ display: 'block', fontSize: '12px' }}>Datum odeslání</label>
+          <div className="form-row">
+            <label className="form-label" htmlFor="manual-tx-date">Datum odeslání</label>
             <input
+              id="manual-tx-date"
               type="date"
-              style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+              className="form-input"
               value={formData.transactionSentDate || ''}
-              onChange={e => setFormData({...formData, transactionSentDate: e.target.value})}
+              onChange={e => setFormData({ ...formData, transactionSentDate: e.target.value })}
               required
             />
           </div>
-          <div style={{ marginBottom: '10px' }}>
-            <label style={{ display: 'block', fontSize: '12px' }}>Variabilní symbol</label>
+          <div className="form-row">
+            <label className="form-label" htmlFor="manual-tx-vs">Variabilní symbol</label>
             <input
+              id="manual-tx-vs"
               type="text"
-              style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-              value={formData.variableSymbol || ''}
-              onChange={e => setFormData({...formData, variableSymbol: e.target.value ? parseInt(e.target.value, 10) : null})}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              className="form-input"
+              value={formData.variableSymbol ?? ''}
+              onChange={e => setFormData({ ...formData, variableSymbol: parseVs(e.target.value) })}
               required
             />
           </div>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '12px' }}>Částka (Kč)</label>
+          <div className="form-row form-row-last">
+            <label className="form-label" htmlFor="manual-tx-amount">Částka (Kč)</label>
             <input
+              id="manual-tx-amount"
               type="number"
-              style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-              value={formData.amount || ''}
-              onChange={e => setFormData({...formData, amount: parseFloat(e.target.value)})}
+              min="0"
+              step="0.01"
+              className="form-input"
+              value={formData.amount ?? ''}
+              onChange={e => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
               required
             />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{ padding: '8px 15px', cursor: 'pointer' }}
-            >
+          <div className="modal-actions">
+            <button type="button" className="btn-base btn-cancel" onClick={onClose}>
               Zrušit
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: '8px 15px',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-                opacity: loading ? 0.7 : 1
-              }}
-            >
+            <button type="submit" className="btn-base btn-sync" disabled={loading}>
               {loading ? 'Odesílám...' : 'Vložit'}
             </button>
           </div>

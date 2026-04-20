@@ -6,10 +6,7 @@ interface ActionButtonProps {
 }
 
 export const ManualTransactionButton: React.FC<ActionButtonProps> = ({ onClick }) => (
-  <Button
-    onClick={onClick}
-    className="btn-manual"
-  >
+  <Button onClick={onClick} className="btn-manual">
     + Vložit ručně
   </Button>
 );
@@ -19,11 +16,7 @@ interface SyncButtonProps extends ActionButtonProps {
 }
 
 export const SyncButton: React.FC<SyncButtonProps> = ({ onClick, loading }) => (
-  <Button
-    onClick={onClick}
-    disabled={loading}
-    className="btn-sync"
-  >
+  <Button onClick={onClick} disabled={loading} className="btn-sync">
     {loading ? 'Pracuji...' : 'Aktualizovat z Monety'}
   </Button>
 );
@@ -33,10 +26,7 @@ interface IgnoreButtonProps extends ActionButtonProps {
 }
 
 export const IgnoreButton: React.FC<IgnoreButtonProps> = ({ onClick, isActive }) => (
-  <Button
-    onClick={onClick}
-    className={`btn-ignore ${isActive ? 'active' : ''}`}
-  >
+  <Button onClick={onClick} className={`btn-ignore ${isActive ? 'active' : ''}`}>
     Ignorovat
   </Button>
 );

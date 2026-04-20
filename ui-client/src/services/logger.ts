@@ -21,5 +21,5 @@ export const logger: Logger = {
   },
   debug: (message, ...args) => {
     if (isDev) console.debug(`%c[DEBUG] ${message}`, 'color: #9C27B0', ...args);
-  }
+  },
 };

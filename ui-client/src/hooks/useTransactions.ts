@@ -9,7 +9,10 @@ const TRANSACTIONS_KEY = ['transactions'] as const;
 
 export const useTransactions = () => {
   const queryClient = useQueryClient();
-  const [status, setStatus] = useState<{ message: string; type: StatusType }>({ message: '', type: '' });
+  const [status, setStatus] = useState<{ message: string; type: StatusType }>({
+    message: '',
+    type: '',
+  });
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showMessage = (message: string, type: StatusType = 'info') => {
@@ -18,9 +21,12 @@ export const useTransactions = () => {
     dismissTimer.current = setTimeout(() => setStatus({ message: '', type: '' }), 5000);
   };
 
-  useEffect(() => () => {
-    if (dismissTimer.current) clearTimeout(dismissTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (dismissTimer.current) clearTimeout(dismissTimer.current);
+    },
+    [],
+  );
 
   const transactionsQuery = useQuery({
     queryKey: TRANSACTIONS_KEY,
@@ -44,9 +50,10 @@ export const useTransactions = () => {
     },
     onError: (error: unknown) => {
       logger.error('Sync failed:', error);
-      const msg = error instanceof Error && error.message === 'RATE_LIMIT'
-        ? 'Zpomalte! Další synchronizace možná za chvíli.'
-        : 'Bankovní API je momentálně nedostupné.';
+      const msg =
+        error instanceof Error && error.message === 'RATE_LIMIT'
+          ? 'Zpomalte! Další synchronizace možná za chvíli.'
+          : 'Bankovní API je momentálně nedostupné.';
       showMessage(msg, 'error');
     },
   });
@@ -57,7 +64,7 @@ export const useTransactions = () => {
       showMessage('Změny byly odeslány ke zpracování.', 'success');
       // Optimistic remove from list — backend will re-sync on next fetch.
       queryClient.setQueryData<Transaction[]>(TRANSACTIONS_KEY, (prev) =>
-        prev ? prev.filter(t => t.id !== variables.id) : prev
+        prev ? prev.filter((t) => t.id !== variables.id) : prev,
       );
     },
     onError: (error: unknown) => {
@@ -68,7 +75,7 @@ export const useTransactions = () => {
 
   const updateLocalTransaction = (next: Transaction) => {
     queryClient.setQueryData<Transaction[]>(TRANSACTIONS_KEY, (prev) =>
-      prev ? prev.map(t => (t.id === next.id ? next : t)) : prev
+      prev ? prev.map((t) => (t.id === next.id ? next : t)) : prev,
     );
   };
 

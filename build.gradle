@@ -5,6 +5,8 @@ plugins {
   id 'org.openrewrite.rewrite' version '7.23.0'
   id "org.sonarqube" version "7.2.2.6593"
   id 'jacoco'
+  id 'com.github.ben-manes.versions' version '0.52.0'
+  id 'org.owasp.dependencycheck' version '12.1.6'
 }
 
 group = 'navrat.name'
@@ -118,4 +120,23 @@ tasks.named('test') {
 
 tasks.withType(Test).configureEach {
   jvmArgs("-XX:+EnableDynamicAgentLoading")
+}
+
+// `gradlew dependencyUpdates` — list outdated deps. Reject pre-release versions by default.
+tasks.named('dependencyUpdates').configure {
+  rejectVersionIf { sel ->
+    def s = sel.candidate.version.toLowerCase()
+    s.contains('alpha') || s.contains('beta') || s.contains('rc') || s.contains('m1') || s.contains('m2') || s.contains('cr')
+  }
+}
+
+// `gradlew dependencyCheckAnalyze` — OWASP CVE scan against NVD database.
+// Set NVD_API_KEY env var (free at https://nvd.nist.gov/developers/request-an-api-key) to avoid heavy rate-limiting.
+dependencyCheck {
+  failBuildOnCVSS = 7  // fail build on High+ CVE
+  nvd {
+    if (System.getenv('NVD_API_KEY')) apiKey = System.getenv('NVD_API_KEY')
+  }
+  formats = ['HTML', 'JSON']
+  suppressionFile = file('config/owasp-suppressions.xml').exists() ? 'config/owasp-suppressions.xml' : null
 }

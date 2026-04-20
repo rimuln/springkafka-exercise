@@ -3,7 +3,10 @@
   /* Změna: už není na střed, ale na celou šířku s okrajem */
   width: 90%;
   padding: 20px 40px;
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    sans-serif;
   color: #333;
   box-sizing: border-box;
 }
@@ -27,7 +30,7 @@
   justify-content: center;
   z-index: 10;
   font-weight: bold;
-  color: #2196F3;
+  color: #2196f3;
   backdrop-filter: blur(1px); /* Jemné rozmazání pozadí */
 }
 
@@ -74,18 +77,18 @@ h1 {
 
 /* Specifické barvy tlačítek */
 .btn-manual {
-  background-color: #2196F3;
+  background-color: #2196f3;
   color: white;
   box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
 }
 
 .btn-manual:hover {
-  background-color: #1976D2;
+  background-color: #1976d2;
   box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
 }
 
 .btn-sync {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
 }
@@ -103,7 +106,9 @@ h1 {
   font-size: 12px;
 }
 
-.btn-ignore:hover { background-color: #eeeeee; }
+.btn-ignore:hover {
+  background-color: #eeeeee;
+}
 
 .btn-ignore.active {
   background-color: #ffebee;
@@ -133,7 +138,7 @@ h1 {
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .fixed-table th {
@@ -179,7 +184,7 @@ h1 {
 }
 
 .vs-input:focus {
-  border-color: #2196F3;
+  border-color: #2196f3;
   outline: none;
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
@@ -195,17 +200,29 @@ h1 {
   color: white;
   font-weight: bold;
   z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   animation: slideDown 0.4s ease-out;
 }
 
-.status-banner.success { background-color: #43a047; }
-.status-banner.error { background-color: #d32f2f; }
-.status-banner.info { background-color: #1976D2; }
+.status-banner.success {
+  background-color: #43a047;
+}
+.status-banner.error {
+  background-color: #d32f2f;
+}
+.status-banner.info {
+  background-color: #1976d2;
+}
 
 @keyframes slideDown {
-  from { top: -60px; opacity: 0; }
-  to { top: 20px; opacity: 1; }
+  from {
+    top: -60px;
+    opacity: 0;
+  }
+  to {
+    top: 20px;
+    opacity: 1;
+  }
 }
 
 /* Mezera mezi tlačítky v tabulce */
@@ -253,7 +270,9 @@ h1 {
   color: #555;
 }
 
-.btn-cancel:hover { background-color: #eeeeee; }
+.btn-cancel:hover {
+  background-color: #eeeeee;
+}
 
 /* Form rows */
 .form-row {
@@ -282,7 +301,7 @@ h1 {
 }
 
 .form-input:focus {
-  border-color: #2196F3;
+  border-color: #2196f3;
   outline: none;
   box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }

@@ -50,23 +50,34 @@ const ManualTransactionDialog: React.FC<ManualTransactionDialogProps> = ({
   };
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="manual-tx-title">
+    <div
+      className="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="manual-tx-title"
+    >
       <div className="modal-card">
-        <h3 id="manual-tx-title" className="modal-title">Ruční vložení transakce</h3>
+        <h3 id="manual-tx-title" className="modal-title">
+          Ruční vložení transakce
+        </h3>
         <form onSubmit={handleSubmit}>
           <div className="form-row">
-            <label className="form-label" htmlFor="manual-tx-date">Datum odeslání</label>
+            <label className="form-label" htmlFor="manual-tx-date">
+              Datum odeslání
+            </label>
             <input
               id="manual-tx-date"
               type="date"
               className="form-input"
               value={formData.transactionSentDate || ''}
-              onChange={e => setFormData({ ...formData, transactionSentDate: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, transactionSentDate: e.target.value })}
               required
             />
           </div>
           <div className="form-row">
-            <label className="form-label" htmlFor="manual-tx-vs">Variabilní symbol</label>
+            <label className="form-label" htmlFor="manual-tx-vs">
+              Variabilní symbol
+            </label>
             <input
               id="manual-tx-vs"
               type="text"
@@ -74,12 +85,16 @@ const ManualTransactionDialog: React.FC<ManualTransactionDialogProps> = ({
               pattern="[0-9]*"
               className="form-input"
               value={formData.variableSymbol ?? ''}
-              onChange={e => setFormData({ ...formData, variableSymbol: parseVs(e.target.value) })}
+              onChange={(e) =>
+                setFormData({ ...formData, variableSymbol: parseVs(e.target.value) })
+              }
               required
             />
           </div>
           <div className="form-row form-row-last">
-            <label className="form-label" htmlFor="manual-tx-amount">Částka (Kč)</label>
+            <label className="form-label" htmlFor="manual-tx-amount">
+              Částka (Kč)
+            </label>
             <input
               id="manual-tx-amount"
               type="number"
@@ -87,7 +102,7 @@ const ManualTransactionDialog: React.FC<ManualTransactionDialogProps> = ({
               step="0.01"
               className="form-input"
               value={formData.amount ?? ''}
-              onChange={e => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
               required
             />
           </div>

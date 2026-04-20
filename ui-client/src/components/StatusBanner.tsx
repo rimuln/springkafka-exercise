@@ -9,11 +9,7 @@ interface StatusBannerProps {
 const StatusBanner: React.FC<StatusBannerProps> = ({ message, type }) => {
   if (!message) return null;
 
-  return (
-    <div className={`status-banner ${type}`}>
-      {message}
-    </div>
-  );
+  return <div className={`status-banner ${type}`}>{message}</div>;
 };
 
 export default StatusBanner;

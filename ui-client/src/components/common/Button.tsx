@@ -8,20 +8,9 @@ interface ButtonProps {
   style?: CSSProperties;
 }
 
-const Button: React.FC<ButtonProps> = ({
-  onClick,
-  disabled,
-  children,
-  className = '',
-  style
-}) => {
+const Button: React.FC<ButtonProps> = ({ onClick, disabled, children, className = '', style }) => {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`btn-base ${className}`}
-      style={style}
-    >
+    <button onClick={onClick} disabled={disabled} className={`btn-base ${className}`} style={style}>
       {children}
     </button>
   );

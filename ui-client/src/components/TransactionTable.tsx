@@ -66,7 +66,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                   type="text"
                   className="vs-input"
                   value={t.variableSymbol ?? ''}
-                  onChange={e => handleVsChange(t, e.target.value)}
+                  onChange={(e) => handleVsChange(t, e.target.value)}
                 />
               </td>
               <td>
@@ -75,10 +75,7 @@ const TransactionTable: React.FC<TransactionTableProps> = ({
                     onClick={() => handleIgnore(t)}
                     isActive={t.processingStatus === 'IGNORE'}
                   />
-                  <FixButton
-                    onClick={() => onUpdate(t)}
-                    disabled={!t.isDirty}
-                  />
+                  <FixButton onClick={() => onUpdate(t)} disabled={!t.isDirty} />
                 </div>
               </td>
             </tr>

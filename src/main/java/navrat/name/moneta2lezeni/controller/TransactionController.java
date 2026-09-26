@@ -2,6 +2,7 @@ package navrat.name.moneta2lezeni.controller;
 
 import static navrat.name.moneta2lezeni.model.ProcessingStatus.PENDING_MANUAL;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -46,7 +48,7 @@ public class TransactionController {
     }
 
     @PostMapping("/manual")
-    public ResponseEntity<Void> sendManualTransaction(@RequestBody TransactionDto dto) {
+    public ResponseEntity<Map<String, String>> sendManualTransaction(@RequestBody TransactionDto dto) {
         dto.setProcessingStatus(PENDING_MANUAL);
         dto.setCreditDebitFlag(4);
         dto.setAccountName("ČESKÝ HOROLEZECKÝ");
@@ -56,6 +58,13 @@ public class TransactionController {
         }
         if (dto.getTransactionDate() == null) {
             dto.setTransactionDate(dto.getTransactionSentDate());
+        }
+        if (transactionService.isDuplicateManualTransaction(dto)) {
+            log.warn("Rejecting duplicate manual transaction VS {} amount {} date {}",
+                    dto.getVariableSymbol(), dto.getAmount(), dto.getTransactionSentDate());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message",
+                    "Transakce s VS " + dto.getVariableSymbol() + " a částkou " + dto.getAmount()
+                            + " ze dne " + dto.getTransactionSentDate() + " už byla vložena"));
         }
         transactionService.sendManualTransaction(dto);
         return ResponseEntity.ok().build();

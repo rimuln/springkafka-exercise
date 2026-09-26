@@ -283,6 +283,15 @@ h1 {
   margin-bottom: 20px;
 }
 
+.form-error {
+  margin: -8px 0 16px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background-color: #ffebee;
+  color: #d32f2f;
+  font-size: 0.9rem;
+}
+
 .form-label {
   display: block;
   font-size: 12px;

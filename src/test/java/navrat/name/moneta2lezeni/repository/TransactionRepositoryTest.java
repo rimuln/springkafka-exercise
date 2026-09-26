@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -54,6 +55,25 @@ class TransactionRepositoryTest {
 
         assertThat(result).isPresent();
         assertThat(result.get().getAccountName()).isEqualTo("Nejnovější");
+    }
+
+    @Test
+    void existsManualDuplicate_shouldMatchOnVsAmountDateAndStatus() {
+        LocalDate date = LocalDate.of(2026, 9, 25);
+        Transaction t = createTransactionEntity(null, date, MANUALY_FIXED);
+        t.setId(null);
+        t.setVariableSymbol(36149L);
+        t.setAmount(new BigDecimal("1000.00"));
+        entityManager.persistAndFlush(t);
+
+        assertThat(repositoryUnderTest.existsByVariableSymbolAndAmountAndTransactionSentDateAndProcessingStatus(
+                36149L, BigDecimal.valueOf(1000), date, MANUALY_FIXED)).isTrue();
+        assertThat(repositoryUnderTest.existsByVariableSymbolAndAmountAndTransactionSentDateAndProcessingStatus(
+                36157L, BigDecimal.valueOf(1000), date, MANUALY_FIXED)).isFalse();
+        assertThat(repositoryUnderTest.existsByVariableSymbolAndAmountAndTransactionSentDateAndProcessingStatus(
+                36149L, BigDecimal.valueOf(500), date, MANUALY_FIXED)).isFalse();
+        assertThat(repositoryUnderTest.existsByVariableSymbolAndAmountAndTransactionSentDateAndProcessingStatus(
+                36149L, BigDecimal.valueOf(1000), date.minusDays(1), MANUALY_FIXED)).isFalse();
     }
 
     @Test

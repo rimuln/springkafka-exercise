@@ -39,6 +39,11 @@ public class TransactionService {
         });
     }
 
+    public boolean isDuplicateManualTransaction(TransactionDto dto) {
+        return repository.existsByVariableSymbolAndAmountAndTransactionSentDateAndProcessingStatus(
+                dto.getVariableSymbol(), dto.getAmount(), dto.getTransactionSentDate(), MANUALY_FIXED);
+    }
+
     public void sendManualTransaction(TransactionDto dto) {
         try {
             kafkaProducer.sendTransaction(dto);

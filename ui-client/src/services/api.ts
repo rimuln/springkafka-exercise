@@ -3,9 +3,21 @@ import type { Transaction } from '../types/transaction';
 
 const BASE_URL = '/api';
 
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConflictError';
+  }
+}
+
 async function handleResponse<T>(response: Response): Promise<T | null> {
   if (response.status === 429) {
     throw new Error('RATE_LIMIT');
+  }
+
+  if (response.status === 409) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new ConflictError(errorData.message || 'CONFLICT');
   }
 
   if (!response.ok) {

@@ -3,10 +3,12 @@ package navrat.name.moneta2lezeni.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
+import navrat.name.moneta2lezeni.model.ProcessingStatus;
 import navrat.name.moneta2lezeni.model.Transaction;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID>, QuerydslPredicateExecutor<Transaction> {
@@ -16,4 +18,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
     // not pollute the Moneta-sync cursor (filter in MonetaTransparentAccountService relies on
     // all three fields being non-null).
     Optional<Transaction> findFirstByTransactionDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionDateDescTransactionNumberDesc();
+
+    boolean existsByVariableSymbolAndAmountAndTransactionSentDateAndProcessingStatus(
+            Long variableSymbol, BigDecimal amount, LocalDate transactionSentDate, ProcessingStatus processingStatus);
 }

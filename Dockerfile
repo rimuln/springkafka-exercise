@@ -1,4 +1,4 @@
-FROM gradle:9.2.1-jdk25 AS build
+FROM gradle:9.8.0-jdk25 AS build
 WORKDIR /app
 
 # Cache gradle deps in their own layer — invalidated only when build files change.

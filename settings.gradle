@@ -1,1 +1,9 @@
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    // org.openrewrite.rewrite plugin resolves rewrite-bom from Maven Central
+    mavenCentral()
+  }
+}
+
 rootProject.name = 'moneta2lezeni'

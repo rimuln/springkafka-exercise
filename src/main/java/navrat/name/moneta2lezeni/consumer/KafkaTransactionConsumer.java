@@ -9,6 +9,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import navrat.name.moneta2lezeni.dto.TransactionDto;
@@ -37,9 +38,7 @@ public class KafkaTransactionConsumer {
 
     @KafkaListener(topics = "new-transactions", groupId = "transaction-group")
     public void consume(TransactionDto dto) {
-        Transaction entity = transactionRepository
-                .findByTransactionNumberAndTransactionSentDate(dto.getTransactionNumber(), dto.getTransactionSentDate())
-                .orElseGet(() -> mapper.toEntity(dto));
+        Transaction entity = findExisting(dto).orElseGet(() -> mapper.toEntity(dto));
 
         log.info("Processing transaction {}. Current status: {}",
                 dto.getIdentifier(), entity.getProcessingStatus());
@@ -60,6 +59,16 @@ public class KafkaTransactionConsumer {
         transactionRepository.save(entity);
         log.info("Transaction {} saved with final status {}",
                 entity.getIdentifier(), entity.getProcessingStatus());
+    }
+
+    // Manual transactions from the UI have no transactionNumber; looking them up by
+    // (null, sentDate) would match any other manual row from the same day.
+    private Optional<Transaction> findExisting(TransactionDto dto) {
+        if (dto.getTransactionNumber() == null) {
+            return dto.getId() != null ? transactionRepository.findById(dto.getId()) : Optional.empty();
+        }
+        return transactionRepository
+                .findByTransactionNumberAndTransactionSentDate(dto.getTransactionNumber(), dto.getTransactionSentDate());
     }
 
     private boolean isInFinalState(Transaction entity) {

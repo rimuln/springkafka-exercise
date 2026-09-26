@@ -1,6 +1,9 @@
 package navrat.name.moneta2lezeni.consumer;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static navrat.name.moneta2lezeni.model.ProcessingStatus.AUTO_PROCESSED;
@@ -94,5 +97,46 @@ class KafkaTransactionConsumerTest {
         consumerUnderTest.consume(dto);
 
         verify(transactionRepository).save(argThat(t -> t.getProcessingStatus() == MANUALY_FIXED));
+    }
+
+    @Test
+    void consume_shouldProcessEachManualTransaction_whenSameDayAndNoTransactionNumber() {
+        var amount = BigDecimal.valueOf(1000);
+        var first = createTransactionDto(null, PENDING_MANUAL, 36149L);
+        first.setAmount(amount);
+        first.setTransactionNumber(null);
+        var second = createTransactionDto(null, PENDING_MANUAL, 36157L);
+        second.setAmount(amount);
+        second.setTransactionNumber(null);
+
+        // both DTOs are equal per TransactionDto.equals (same null number + date), so stub sequentially
+        when(mapper.toEntity(any())).thenReturn(
+                createTransactionEntity(null, PENDING_MANUAL, 36149L),
+                createTransactionEntity(null, PENDING_MANUAL, 36157L));
+        when(lezeniApiService.callExternalApi(36149L, amount, MANUALY_FIXED)).thenReturn(MANUALY_FIXED);
+        when(lezeniApiService.callExternalApi(36157L, amount, MANUALY_FIXED)).thenReturn(MANUALY_FIXED);
+
+        consumerUnderTest.consume(first);
+        consumerUnderTest.consume(second);
+
+        verify(transactionRepository, never()).findByTransactionNumberAndTransactionSentDate(any(), any());
+        verify(lezeniApiService).callExternalApi(36149L, amount, MANUALY_FIXED);
+        verify(lezeniApiService).callExternalApi(36157L, amount, MANUALY_FIXED);
+        verify(transactionRepository, times(2)).save(argThat(t -> t.getProcessingStatus() == MANUALY_FIXED));
+    }
+
+    @Test
+    void consume_shouldLookUpById_whenManualTransactionHasNoTransactionNumber() {
+        var id = UUID.randomUUID();
+        var dto = createTransactionDto(id, MANUALY_FIXED, 36149L);
+        dto.setTransactionNumber(null);
+        var entity = createTransactionEntity(id, MANUALY_FIXED, 36149L);
+
+        when(transactionRepository.findById(id)).thenReturn(Optional.of(entity));
+
+        consumerUnderTest.consume(dto);
+
+        verify(transactionRepository, never()).save(any());
+        verify(lezeniApiService, never()).callExternalApi(any(), any(), any());
     }
 }

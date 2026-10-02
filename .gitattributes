@@ -1,3 +1,70 @@
-/gradlew text eol=lf
-*.bat text eol=crlf
-*.jar binary
+# Konce řádků (EOL) — sjednoceno podle ekosystému, stejný princip jako lezeni-repo (2026-10-02)
+# Git normalizuje bloby na LF a na checkoutu nasadí EOL podle typu souboru:
+#   Java backend               → CRLF (vývoj na Windows, většina zdrojáků už CRLF byla)
+#   frontend (Vite/Prettier)   → LF (.prettierrc.json má endOfLine: lf)
+#   YAML / Docker / Gradle     → LF (běží v Linuxových kontejnerech / CI)
+#   Markdown, cmd/bat, PS      → CRLF
+#   shell skripty              → LF (jinak se na Linuxu rozbijí)
+# Díky atributu `text` git normalizuje při add/diff, takže nezáleží, co zapíše
+# editor nebo skript (sed -i) — žádné falešné CRLF↔LF flipy v diffu.
+#
+# Binární soubory git NIKDY nekonvertuje (EOL/charset).
+
+# Java backend → CRLF
+*.java        text eol=crlf
+*.properties  text eol=crlf
+
+# Gradle / Docker / YAML → LF
+*.gradle      text eol=lf
+/gradlew      text eol=lf
+Dockerfile    text eol=lf
+*.yaml        text eol=lf
+*.yml         text eol=lf
+*.xml         text eol=lf
+
+# Frontend (Prettier endOfLine: lf) → LF
+*.ts          text eol=lf
+*.tsx         text eol=lf
+*.js          text eol=lf
+*.mjs         text eol=lf
+*.cjs         text eol=lf
+*.json        text eol=lf
+*.css         text eol=lf
+*.html        text eol=lf
+*.svg         text eol=lf
+.gitignore    text eol=lf
+.gitattributes text eol=lf
+.prettierignore text eol=lf
+
+# Dávky cmd.exe → CRLF (LF rozbíjí pokračování řádků `^` a bloky if/else)
+*.cmd         text eol=crlf
+*.bat         text eol=crlf
+
+# PowerShell → CRLF
+*.ps1         text eol=crlf
+*.psm1        text eol=crlf
+*.psd1        text eol=crlf
+
+# Markdown → CRLF (F3 v Total Commanderu pak zobrazí dokument správně)
+*.md          text eol=crlf
+
+# Shell skripty MUSÍ být LF i na Windows
+*.sh          text eol=lf
+
+# Binární soubory – žádná konverze, žádný textový diff
+*.jar   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+*.zip   binary
+*.xlsx  binary
+*.docx  binary
+*.exe   binary
+*.dll   binary

@@ -40,7 +40,7 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    void findFirstByTransactionDateIsNotNull_shouldReturnNewestAndIgnoreNullDateRows() {
+    void findNewest_shouldReturnNewestAndIgnoreNullDateRows() {
         // Manual transactions can have null transactionDate / transactionNumber.
         // PostgreSQL puts NULLs first in ORDER BY DESC, so without the IsNotNull guard
         // these rows would shadow real Moneta transactions and break the sync cursor.
@@ -51,10 +51,29 @@ class TransactionRepositoryTest {
         createAndPersist("Manualni s NULL number", LocalDate.of(2026, 1, 18), null);
 
         Optional<Transaction> result = repositoryUnderTest
-                .findFirstByTransactionDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionDateDescTransactionNumberDesc();
+                .findFirstByTransactionSentDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionSentDateDescTransactionNumberDesc();
 
         assertThat(result).isPresent();
         assertThat(result.get().getAccountName()).isEqualTo("Nejnovější");
+    }
+
+    @Test
+    void findNewest_shouldOrderBySentDateNotTransactionDate() {
+        // Weekend payment booked on 29.9. is newer on the Moneta statement than a payment
+        // made and booked on 28.9., although its transactionDate (27.9.) is older.
+        var booked28 = createTransactionEntity("Zaúčtováno 28.9.", LocalDate.of(2026, 9, 28), 12, PENDING);
+        booked28.setId(null);
+        entityManager.persist(booked28);
+        var weekend = createTransactionEntity("Víkend, zaúčtováno 29.9.", LocalDate.of(2026, 9, 27), 3, PENDING);
+        weekend.setTransactionSentDate(LocalDate.of(2026, 9, 29));
+        weekend.setId(null);
+        entityManager.persist(weekend);
+
+        Optional<Transaction> result = repositoryUnderTest
+                .findFirstByTransactionSentDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionSentDateDescTransactionNumberDesc();
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getAccountName()).isEqualTo("Víkend, zaúčtováno 29.9.");
     }
 
     @Test

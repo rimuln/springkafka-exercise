@@ -1,5 +1,6 @@
 package navrat.name.moneta2lezeni.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -11,12 +12,16 @@ import static navrat.name.moneta2lezeni.utils.DtoTestFactory.createTransactionDt
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriBuilder;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
@@ -83,6 +88,28 @@ class MonetaTransparentAccountServiceTest {
                 "Both transactions must be kept — same (txNum, sentDate) but different transactionDate is not a duplicate");
         assertEquals(2, result.get(0).getTransactionNumber());
         assertEquals(1, result.get(1).getTransactionNumber());
+    }
+
+    @Test
+    void fetchAllTransactions_shouldPageBySentDateNotTransactionDate() {
+        // Weekend payment: made 2026-09-27, booked (sent) 2026-09-29. Moneta's cursor is
+        // (transactionNumber, transactionSentDate); paging by transactionDate skipped
+        // the remaining 29.9. transactions (#1–#8) in production.
+        var accountName = "246594777";
+        var weekendTx = createTransactionDto(9, LocalDate.of(2026, 9, 27), LocalDate.of(2026, 9, 29));
+        var page1 = createAccountStatementDto(List.of(weekendTx), "N");
+        var page2 = createAccountStatementDto(List.of(createTransactionDto(8, LocalDate.of(2026, 9, 29))), "Y");
+
+        mockRestClientCall(page1, page2);
+
+        serviceUnderTest.fetchAllTransactions(accountName, null);
+
+        ArgumentCaptor<Function<UriBuilder, URI>> uriCaptor = ArgumentCaptor.forClass(Function.class);
+        verify(requestHeadersUriSpec, times(2)).uri(uriCaptor.capture());
+        URI secondPage = uriCaptor.getAllValues().get(1).apply(new DefaultUriBuilderFactory().builder());
+        assertThat(secondPage.getQuery())
+                .contains("transactionNumber=9")
+                .contains("transactionDate=2026-09-29");
     }
 
     @Test

@@ -93,6 +93,8 @@ docker compose up               # full stack
 - `src/test/java/.../utils/` holds shared test helpers; existing suites cover service/consumer/controller/repository layers and a `Resilence4JConfigTest` that exercises the annotations end-to-end.
 - Frontend tests use Vitest + jsdom + `@testing-library/react`; setup in `ui-client/tests/setup.ts`. Only the setup file exists today — any new tests go under `ui-client/tests/`.
 
-## Known open bug
+## Moneta paging semantics (read before touching sync/dedup)
 
-`bugfix-moneta-pagination.md` (at repo root) documents an unfixed duplicate-detection bug in `MonetaTransparentAccountService.fetchAllTransactions` — the filter matches on `(transactionNumber, transactionSentDate)` which is **not** unique across days (Moneta resets `transactionNumber` daily). The file spells out the fix (add `transactionDate` to the predicate, or compare by `id`) and the data-repair options. Read it before touching the pagination/dedup logic.
+- Moneta numbers transactions per **`transactionSentDate`** (booking day); `(transactionNumber, transactionSentDate)` is unique, `(transactionNumber, transactionDate)` is not.
+- The paging cursor is `(transactionNumber, transactionSentDate)` even though the query parameter is named `transactionDate`. `fetchAllTransactions` must pass the last item's **sent** date; passing `transactionDate` of a weekend payment (older than its sent date) jumps back a day and silently drops the rest of that booking day — this lost payments on 2026-08-24/25 and 2026-09-29.
+- The "newest in DB" sync anchor is ordered by `transactionSentDate DESC, transactionNumber DESC` for the same reason.

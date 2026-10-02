@@ -25,7 +25,7 @@ public class SynchronizeTransactionService {
     @Transactional
     public void syncTransactions(String accountName) {
         Optional<Transaction> newestTransaction = transactionRepository
-                .findFirstByTransactionDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionDateDescTransactionNumberDesc();
+                .findFirstByTransactionSentDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionSentDateDescTransactionNumberDesc();
         TransactionDto newestTransactionDto = null;
 
         if (newestTransaction.isPresent()) {

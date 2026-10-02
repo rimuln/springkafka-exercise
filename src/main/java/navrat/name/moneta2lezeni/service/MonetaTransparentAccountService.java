@@ -67,8 +67,12 @@ public class MonetaTransparentAccountService {
                     break;
                 } else {
                     transactionDtos.addAll(currentTransactions);
+                    // Moneta's paging cursor is (transactionNumber, transactionSentDate) even though
+                    // the query parameter is called "transactionDate". Passing the real transactionDate
+                    // of a weekend payment (older than its sent date) jumps back a day and silently
+                    // skips the rest of that statement day.
                     TransactionDto last = currentTransactions.getLast();
-                    transactionDate = last.getTransactionDate();
+                    transactionDate = last.getTransactionSentDate();
                     transactionNumber = last.getTransactionNumber();
                 }
             }

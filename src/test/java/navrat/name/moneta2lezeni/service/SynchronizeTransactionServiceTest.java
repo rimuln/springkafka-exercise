@@ -45,7 +45,7 @@ class SynchronizeTransactionServiceTest {
         TransactionDto incomingDto = createTransactionDto(UUID.randomUUID(), null, null);
         List<TransactionDto> incomingTransactions = List.of(incomingDto);
 
-        when(transactionRepository.findFirstByTransactionDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionDateDescTransactionNumberDesc())
+        when(transactionRepository.findFirstByTransactionSentDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionSentDateDescTransactionNumberDesc())
                 .thenReturn(Optional.of(newestEntity));
         when(mapper.toDto(newestEntity)).thenReturn(newestDto);
         when(monetaService.fetchAllTransactions(accountName, newestDto))
@@ -62,7 +62,7 @@ class SynchronizeTransactionServiceTest {
         TransactionDto incomingDto = createTransactionDto(UUID.randomUUID(), null, null);
         List<TransactionDto> incomingTransactions = List.of(incomingDto);
 
-        when(transactionRepository.findFirstByTransactionDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionDateDescTransactionNumberDesc())
+        when(transactionRepository.findFirstByTransactionSentDateIsNotNullAndTransactionNumberIsNotNullOrderByTransactionSentDateDescTransactionNumberDesc())
                 .thenReturn(Optional.empty());
         when(monetaService.fetchAllTransactions(accountName, null))
                 .thenReturn(incomingTransactions);
